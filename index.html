@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vitória - Coração Animado</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
+      font-family: 'Arial Black', sans-serif;
+    }
+
+    #text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -70%);
+      font-size: 5em;
+      color: #ff4d88;
+      text-shadow: 0 0 10px #ff99cc, 0 0 20px #ff3399;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="text">Vitória</div>
+  <canvas id="c"></canvas>
+
+  <script>
+    const e = [], h = [];
+    const c = document.getElementById('c');
+    const a = c.getContext('2d');
+    const O = c.width = innerWidth;
+    const Q = c.height = innerHeight;
+    const v = 32, M = Math, R = M.random, C = M.cos, Y = 6.3;
+
+    for (let i = 0; i < Y; i += 0.2) {
+      h.push([
+        O / 2 + 180 * M.pow(M.sin(i), 3),
+        Q / 2 + 10 * (-(15 * C(i) - 5 * C(2 * i) - 2 * C(3 * i) - C(4 * i)))
+      ]);
+    }
+
+    for (let i = 0; i < v; i++) {
+      const x = R() * O, y = R() * Q;
+      const H = i / v * 80 + 280, S = R() * 40 + 60, B = R() * 60 + 20;
+      const f = [];
+
+      for (let k = 0; k < v; k++) {
+        f[k] = {
+          x, y, X: 0, Y: 0,
+          R: (1 - k / v) + 1,
+          S: R() + 1,
+          q: ~~(R() * v),
+          D: i % 2 * 2 - 1,
+          F: R() * 0.2 + 0.7,
+          f: `hsla(${~~H},${~~S}%,${~~B}%,.1)`
+        };
+      }
+
+      e[i] = f;
+    }
+
+    function render(p) {
+      a.fillStyle = p.f;
+      a.beginPath();
+      a.arc(p.x, p.y, p.R, 0, Y);
+      a.closePath();
+      a.fill();
+    }
+
+    function loop() {
+      a.fillStyle = "rgba(0,0,0,.2)";
+      a.fillRect(0, 0, O, Q);
+
+      for (let i = 0; i < v; i++) {
+        const f = e[i], u = f[0], q = h[u.q];
+        const D = u.x - q[0], E = u.y - q[1];
+        const G = M.sqrt(D * D + E * E);
+
+        if (G < 10) {
+          if (R() > 0.95) {
+            u.q = ~~(R() * v);
+          } else {
+            if (R() > 0.99) u.D *= -1;
+            u.q = (u.q + u.D + v) % v;
+          }
+        }
+
+        u.X += -D / G * u.S;
+        u.Y += -E / G * u.S;
+        u.x += u.X;
+        u.y += u.Y;
+        render(u);
+        u.X *= u.F;
+        u.Y *= u.F;
+
+        for (let k = 0; k < v - 1; k++) {
+          const T = f[k], N = f[k + 1];
+          N.x -= (N.x - T.x) * 0.7;
+          N.y -= (N.y - T.y) * 0.7;
+          render(N);
+        }
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>
